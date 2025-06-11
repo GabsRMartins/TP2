@@ -70,6 +70,9 @@ Procedimento::~Procedimento()
 
 
 
+
+
+
 void Procedimento::processarFila(Estado estadoAtual, Estado proximoEstado, Escalonador& escalonador, Paciente* paciente) {
     // Define a fila apropriada para o estado atual
     if (proximoEstado != Estado::Alta) {
@@ -88,86 +91,68 @@ void Procedimento::processarFila(Estado estadoAtual, Estado proximoEstado, Escal
 
 
 
-void Procedimento::avaliaFilas(Estado estado, Escalonador& escalonador, Paciente* paciente)
-{
+bool Procedimento::avaliaFilas(Estado estado, Escalonador& escalonador, Paciente* paciente) {
+    bool foiAtendido;
+    Fila* filaVermelho;
+    Fila* filaAmarelo;
+    Fila* filaVerde;
+    int unidadeIndex;
+
     switch (estado) {
-        case Estado::FILA_ATENDIMENTO: {
-            if (fila_atendimentoVermelho.getTamanho() > 0) {      
-                unidades[1].atender(fila_atendimentoVermelho, escalonador,paciente);
-                fila_atendimentoAmarelo.adicionaTempoEspera(unidades[1].getTemp());
-                fila_atendimentoVerde.adicionaTempoEspera(unidades[1].getTemp());
-            } else if (fila_atendimentoAmarelo.getTamanho() > 0) {
-                 while (fila_atendimentoAmarelo.getTamanho() > 0) {
-                unidades[1].atender(fila_atendimentoAmarelo, escalonador,paciente);
-                fila_atendimentoVerde.adicionaTempoEspera(unidades[1].getTemp());
-                }
-            } else {
-                while (fila_atendimentoVerde.getTamanho()> 0) {
-                
-                unidades[1].atender(fila_atendimentoVerde, escalonador,paciente);
-                }
-            }
+        case::Estado::FILA_TRIAGEM: 
+                unidadeIndex = 0;
+                break;
+        case Estado::FILA_ATENDIMENTO:
+            filaVermelho = &fila_atendimentoVermelho;
+            filaAmarelo = &fila_atendimentoAmarelo;
+            filaVerde = &fila_atendimentoVerde;
+            unidadeIndex = 1;
             break;
-        }
-        case Estado::FILA_EI: {
-            if (fila_eiVermelho.getTamanho() > 0) {
-                unidades[4].atender(fila_eiVermelho, escalonador,paciente);
-                fila_eiAmarelo.adicionaTempoEspera(unidades[4].getTemp());
-                fila_eiVerde.adicionaTempoEspera(unidades[4].getTemp());
-            } else if (fila_eiAmarelo.getTamanho() > 0) {
-                unidades[4].atender(fila_eiAmarelo, escalonador,paciente);
-                fila_eiVerde.adicionaTempoEspera(unidades[4].getTemp());
 
-            } else {
-                unidades[4].atender(fila_eiVerde, escalonador,paciente);
-            }
+        case Estado::FILA_EI:
+            filaVermelho = &fila_eiVermelho;
+            filaAmarelo = &fila_eiAmarelo;
+            filaVerde = &fila_eiVerde;
+            unidadeIndex = 4;
             break;
-        }
 
-        case Estado::FILA_IM: {
-            if (fila_imVermelho.getTamanho() > 0) {
-                unidades[5].atender(fila_imVermelho, escalonador,paciente);
-                fila_imAmarelo.adicionaTempoEspera(unidades[5].getTemp());
-                fila_imVerde.adicionaTempoEspera(unidades[5].getTemp());
-            } else if (fila_imAmarelo.getTamanho() > 0) {
-                unidades[5].atender(fila_imAmarelo, escalonador,paciente);
-                fila_imVerde.adicionaTempoEspera(unidades[5].getTemp());
-
-            } else {
-                unidades[5].atender(fila_imVerde, escalonador,paciente);
-            }
+        case Estado::FILA_IM:
+            filaVermelho = &fila_imVermelho;
+            filaAmarelo = &fila_imAmarelo;
+            filaVerde = &fila_imVerde;
+            unidadeIndex = 5;
             break;
-        }
-        case Estado::FILA_MH: {
-            if (fila_mhVermelho.getTamanho() > 0) {
-                unidades[2].atender(fila_mhVermelho, escalonador,paciente);
-                fila_mhAmarelo.adicionaTempoEspera(unidades[2].getTemp());
-                fila_mhVerde.adicionaTempoEspera(unidades[2].getTemp());
-            } else if (fila_mhAmarelo.getTamanho() > 0) {
-                unidades[2].atender(fila_mhAmarelo, escalonador,paciente);
-                fila_mhVerde.adicionaTempoEspera(unidades[2].getTemp());
 
-            } else {
-                unidades[2].atender(fila_mhVerde, escalonador,paciente);
-            }
+        case Estado::FILA_MH:
+            filaVermelho = &fila_mhVermelho;
+            filaAmarelo = &fila_mhAmarelo;
+            filaVerde = &fila_mhVerde;
+            unidadeIndex = 2;
             break;
-        }
 
-        case Estado::FILA_TL: {
-            if (fila_tlVermelho.getTamanho() > 0) {
-                unidades[3].atender(fila_tlVermelho, escalonador,paciente);
-                fila_tlAmarelo.adicionaTempoEspera(unidades[3].getTemp());
-                fila_tlVerde.adicionaTempoEspera(unidades[3].getTemp());
-            } else if (fila_tlAmarelo.getTamanho() > 0) {
-                unidades[3].atender(fila_tlAmarelo, escalonador,paciente);
-                fila_tlVerde.adicionaTempoEspera(unidades[3].getTemp());
-
-            } else {
-                unidades[3].atender(fila_tlVerde, escalonador,paciente);
-            }
+        case Estado::FILA_TL:
+            filaVermelho = &fila_tlVermelho;
+            filaAmarelo = &fila_tlAmarelo;
+            filaVerde = &fila_tlVerde;
+            unidadeIndex = 3;
             break;
-        }
+
+        default:
+            return false; // Estado inválido
     }
+
+    if(estado ==  Estado::FILA_TRIAGEM){
+        foiAtendido = unidades[0].atender(fila_triagem, escalonador, paciente);
+    }else{
+    if (filaVermelho->getTamanho() > 0) {
+       foiAtendido = unidades[unidadeIndex].atender(*filaVermelho, escalonador, paciente);
+    } else if (filaAmarelo->getTamanho() > 0) {
+           foiAtendido =  unidades[unidadeIndex].atender(*filaAmarelo, escalonador, paciente);
+    } else {
+           foiAtendido =  unidades[unidadeIndex].atender(*filaVerde, escalonador, paciente);
+    }
+    }
+    return foiAtendido;
 }
 
 
@@ -213,14 +198,73 @@ void Procedimento::defineFila(Paciente* paciente, Estado estado) {
 }
 
 
+void Procedimento::processarEvento(Estado estadoAtual, Estado proximoEstado, int unidadeIndex, Fila& fila, Escalonador& escalonador, Paciente* paciente) {
+    if (unidadeIndex < 0 || unidadeIndex >= unidades.size()) {
+        std::cerr << "Erro: Índice de unidade inválido: " << unidadeIndex << std::endl;
+        return;
+    }
+
+    if (unidadeDisponivel(unidadeIndex)) {
+        processarAtendimento(proximoEstado, unidadeIndex, escalonador, paciente);
+    } else {
+        processarEspera(unidadeIndex, escalonador, paciente);
+    }
+}
+
+bool Procedimento::unidadeDisponivel(int unidadeIndex) {
+    return !unidades[unidadeIndex].getEstado();
+}
+
+void Procedimento::processarAtendimento(Estado proximoEstado, int unidadeIndex, Escalonador& escalonador, Paciente* paciente) {
+    bool avaliado = avaliaFilas(paciente->getStatus(), escalonador, paciente);
+
+    if (avaliado) {
+        paciente->setStatus(proximoEstado);
+        paciente->adicionarTempo(unidades[unidadeIndex].getTemp(), paciente->getStatus());
+    } else {
+        paciente->adicionarTempo(0.001, paciente->getStatus());
+       
+       
+    }
+
+    criarEvento(paciente, escalonador);
+}
+
+
+void Procedimento::processarEspera(int unidadeIndex, Escalonador& escalonador, Paciente* paciente) {
+    if (!paciente) return;
+    // Obtemos o paciente que está saindo da unidade (se houver)
+    Paciente* pacienteAnterior = unidades[unidadeIndex].getPacienteSaida();  // Supondo que a unidade tenha acesso ao paciente atual
+    if (pacienteAnterior) {
+        Data tempoDeSaida = pacienteAnterior->getData();
+        
+        float tempoEspera = paciente->getData().calcularDiferencaEmHoras(tempoDeSaida);  // Tempo total de hospital do paciente anterior
+        paciente->adicionarTempo(tempoEspera, paciente->getStatus());
+
+    } else {
+       // std::cout << "Nenhum paciente anterior para calcular tempo de espera." << std::endl;
+    }
+
+    criarEvento(paciente, escalonador);
+}
+
+
+
+void Procedimento::criarEvento(Paciente* paciente, Escalonador& escalonador) {
+    Evento eventoNovo(paciente, paciente->getData(), paciente->getStatus());
+    escalonador.insereEvento(eventoNovo);
+}
+
+
+
 void Procedimento::simular()
 {
-    bool fimSimulação = false;
+    bool fimSimulacao = false;
     Escalonador* escalonador = new Escalonador();
-    ;
+
     for (int i = 0; i < qnt_pacientes; ++i) {
         if (!(pacientes.get(i))) {
-            throw std::runtime_error("Paciente inválido na posição " + std::to_string(i));
+            throw std::runtime_error("Paciente invalido na posicao " + std::to_string(i));
         }
         Paciente* aux = pacientes.get(i);
         Data aux_tempo = aux->getData();
@@ -228,87 +272,82 @@ void Procedimento::simular()
         escalonador->insereEvento(event);
     }
 
-    while (!fimSimulação) {
-        // std::cout<< escalonador->size() <<std::endl;
-
-        escalonador->print();
+    while (!fimSimulacao) {
         Evento eventoAvaliado = escalonador->retiraEvento();
-        Evento eventoNovo;
         Paciente* aux = eventoAvaliado.getPaciente();
-        switch (eventoAvaliado.getEstado()) {
 
-            case Estado::CHEGOU: {
+        switch (eventoAvaliado.getEstado()) {
+            case Estado::CHEGOU:
                 processarFila(Estado::CHEGOU, Estado::FILA_TRIAGEM, *escalonador, aux);
                 break;
-            }
-            case Estado::FILA_TRIAGEM: {
-                
-                unidades[0].atender(fila_triagem, *escalonador,aux);
+
+            case Estado::FILA_TRIAGEM:
+                processarEvento(Estado::FILA_TRIAGEM, Estado::SENDO_TRIADO, 0, fila_triagem, *escalonador, aux);
                 break;
-            }
-            case Estado::SENDO_TRIADO: {
+
+            case Estado::SENDO_TRIADO:
+                unidades[0].retirar(aux);
                 processarFila(Estado::SENDO_TRIADO, Estado::FILA_ATENDIMENTO, *escalonador, aux);
                 break;
-            }
-            case Estado::FILA_ATENDIMENTO: {
-                // std::cout<< "Atendendo Fila 2" <<std::endl;
-                avaliaFilas(Estado::FILA_ATENDIMENTO, *escalonador,aux);
+
+            case Estado::FILA_ATENDIMENTO:
+                processarEvento(Estado::FILA_ATENDIMENTO, Estado::SENDO_ATENDIDO, 1, getFilaPorEstadoEurgencia(aux->getStatus(), aux->getUrgencia()), *escalonador, aux);
                 break;
-            }
-            case Estado::SENDO_ATENDIDO: {
+
+            case Estado::SENDO_ATENDIDO:
+            unidades[1].retirar(aux);
                 if (aux->getAlta()) {
-                     processarFila(Estado::SENDO_ATENDIDO, Estado::Alta, *escalonador, aux);
+                    processarFila(Estado::SENDO_ATENDIDO, Estado::Alta, *escalonador, aux);
                 } else {
                     processarFila(Estado::SENDO_ATENDIDO, Estado::FILA_MH, *escalonador, aux);
                 }
                 break;
-            }
-            case Estado::FILA_MH: {
-                 //std::cout<< "Atendendo Fila 3"<<std::endl;
-                avaliaFilas(Estado::FILA_MH, *escalonador, aux);
+
+            case Estado::FILA_MH:
+                processarEvento(Estado::FILA_MH, Estado::R_MH, 2, getFilaPorEstadoEurgencia(aux->getStatus(), aux->getUrgencia()), *escalonador, aux);
                 break;
-            }
-            case Estado::R_MH: {
+
+            case Estado::R_MH:
+                unidades[2].retirar(aux);
                 processarFila(Estado::R_MH, Estado::FILA_TL, *escalonador, aux);
                 break;
-            }
-            case Estado::FILA_TL: {
-                // std::cout<< "Atendendo Fila 4" <<std::endl;
-                avaliaFilas(Estado::FILA_TL, *escalonador, aux);
+
+            case Estado::FILA_TL:
+                processarEvento(Estado::FILA_TL, Estado::R_TL, 3, getFilaPorEstadoEurgencia(aux->getStatus(), aux->getUrgencia()), *escalonador, aux);
                 break;
-            }
-            case Estado::R_TL: {
+
+            case Estado::R_TL:
+                unidades[3].retirar(aux);
                 processarFila(Estado::R_TL, Estado::FILA_EI, *escalonador, aux);
                 break;
-            }
-            case Estado::FILA_EI: {
-                // std::cout<< "Atendendo Fila 5"<<std::endl;
-                avaliaFilas(Estado::FILA_EI, *escalonador,aux);
+
+            case Estado::FILA_EI:
+                processarEvento(Estado::FILA_EI, Estado::R_EI, 4, getFilaPorEstadoEurgencia(aux->getStatus(), aux->getUrgencia()), *escalonador, aux);
                 break;
-            }
-            case Estado::R_EI: {
+
+            case Estado::R_EI:
+                unidades[4].retirar(aux);
                 processarFila(Estado::R_EI, Estado::FILA_IM, *escalonador, aux);
                 break;
-            }
-            case Estado::FILA_IM: {
-                // std::cout<< "Atendendo Fila 6"<<std::endl;
-                avaliaFilas(Estado::FILA_IM, *escalonador,aux);
+
+            case Estado::FILA_IM:
+                processarEvento(Estado::FILA_IM, Estado::R_IM, 5, getFilaPorEstadoEurgencia(aux->getStatus(), aux->getUrgencia()), *escalonador, aux);
                 break;
-            }
-            case Estado::R_IM: {
+
+            case Estado::R_IM:
+                unidades[5].retirar(aux);
                 processarFila(Estado::R_IM, Estado::Alta, *escalonador, aux);
                 break;
-            }
-            case Estado::Alta: {
+
+            case Estado::Alta:
                 break;
-            }
         }
 
         if (escalonador->isEmpty()) {
-            fimSimulação = true;
-            delete escalonador;
+            fimSimulacao = true;
         }
     }
+    delete escalonador;
 }
 
 void Procedimento::estatisticas()

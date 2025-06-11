@@ -3,6 +3,8 @@
 #include <complex.h>
 #include <cstddef>
 #include <iostream>
+#include <ostream>
+#include <stdexcept>
 
 
   Unidade::Unidade(){
@@ -26,35 +28,62 @@
        
     }
 
-  bool  Unidade::ocupar(Paciente* novoPaciente) {
-      if (qnt_pacientes >= qnt_atendentes) {
-            std::cerr << "Unidade já está cheia!" << std::endl;
-            return false;
-        }
-        if (novoPaciente == nullptr) {
-        std::cerr << "Erro: ponteiro de paciente é nulo!" << std::endl;
-        return false;;
+  bool Unidade::ocupar(Paciente* novoPaciente) {
+    if (qnt_pacientes >= qnt_atendentes) {
+        std::cerr << "Unidade já está cheia!" << std::endl;
+        return false;
     }
+    
+    if (novoPaciente == nullptr) {
+        std::cerr << "Erro: ponteiro de paciente é nulo!" << std::endl;
+        return false;
+    }
+
+    // Adicionando paciente ao vetor
     pacientes.push_back(novoPaciente);
     qnt_pacientes++;
-    // Atualiza o estado caso atinja a capacidade máxima
+
+
+    // Atualizar o estado da unidade caso atinja a capacidade máxima
     if (qnt_pacientes == qnt_atendentes) {
         m_estado = true;
     }
+
     return true;
 }
 
 
-    void Unidade::esvaziar() {
-        if (!m_estado) {
-            std::cerr << "Unidade já está vazia!" << std::endl;
-            return;
-        }
 
-        pacientes.pop();
-        qnt_pacientes--;
-        m_estado = false;
+void Unidade::retirar(Paciente* Paciente) {
+    if (qnt_pacientes == 0) {
+        std::cerr << "Erro: Nenhum paciente na fila para remover." << std::endl;
+        return;
     }
+
+    // Obter o primeiro paciente
+    int indicePacienteRemovido;
+    for (int i = 0; i < qnt_pacientes; ++i) {
+        if (pacientes[i]->getId() == Paciente->getId()) {
+            indicePacienteRemovido = i;
+        
+        }
+    
+    }
+
+
+    // Remover o primeiro paciente da lista
+    pacientes.erase(indicePacienteRemovido);  
+
+    // Reduzir a contagem de pacientes
+    qnt_pacientes--;
+
+    // Atualizar o estado da unidade
+    m_estado = false;
+
+}
+
+
+
 
     int Unidade::getQtdAtendentes() const { return qnt_atendentes; }
     float Unidade::getTemp() const { return m_tempo_exec; }
@@ -95,76 +124,38 @@ switch (paciente->getStatus()) {
 
 
 
-
-void Unidade::atenderTriagem(Fila& fila, Escalonador& escalonador) {
-    Evento eventoNovo; 
-    Paciente* pacienteAtual = fila.Desenfileira(); // Remove o próximo paciente da fila
-    ocupar(pacienteAtual); // Associa o paciente à unidad
-    alterarStatus(pacienteAtual);
-    pacienteAtual->adicionarTempo(m_tempo_exec, pacienteAtual->getStatus()) ;   
-    eventoNovo = Evento(pacienteAtual,pacienteAtual->getData(), pacienteAtual->getStatus()); 
-    escalonador.insereEvento(eventoNovo);   
-                 
-        if (fila.getTamanho() > 0){
-            fila.adicionaTempoEspera(m_tempo_exec);
+bool Unidade::atender(Fila& fila, Escalonador& escalonador, Paciente* paciente) {
+    if (!m_estado) {  
+        if (fila.getFirst() != paciente) {  return false;
         }
-        
-            esvaziar();
+        Paciente* proximoPacienteAtendido = fila.Desenfileira();
+        assert(paciente == proximoPacienteAtendido);
+        if (proximoPacienteAtendido != nullptr) {  
+            ocupar(proximoPacienteAtendido);  
+            return true;
+        } 
+    }
+    return false;
 }
 
-void Unidade::atender(Fila& fila, Escalonador& escalonador, Paciente* paciente) {
-   
 
-    if (!m_estado) { // Verifica se a unidade está desocupada
-        Paciente* proximoPacienteAtendido = fila.Desenfileira();
-        if (proximoPacienteAtendido != nullptr) { // Verifica se o paciente é válido
-            ocupar(proximoPacienteAtendido); // Marca a unidade como ocupada
-            alterarStatus(proximoPacienteAtendido); // Altera o status do paciente
-            proximoPacienteAtendido->adicionarTempo(m_tempo_exec, proximoPacienteAtendido->getStatus());
-            
-            // Cria e insere o evento no escalonador
-            Evento eventoNovo = Evento(proximoPacienteAtendido, 
-                                        proximoPacienteAtendido->getData(), 
-                                        proximoPacienteAtendido->getStatus());
-            escalonador.insereEvento(eventoNovo);
-            
-            // Após concluir o atendimento, esvazia a unidade
-            esvaziar();
+
+Paciente* Unidade::getPacienteSaida() {
+    if (qnt_pacientes == 0) {
+        return nullptr; // Nenhum paciente na unidade
+    }
+
+    Paciente* primeiroSaida = pacientes[0]; // Inicializa com o primeiro paciente
+
+    for (int i = 1; i < qnt_pacientes; ++i) {
+        if (pacientes[i]->getData() < primeiroSaida->getData()) {
+            primeiroSaida = pacientes[i];
         }
     }
-    fila.adicionaTempoEspera(m_tempo_exec);
-
+    return primeiroSaida;
 }
 
 
-  /*   // Verifica se há pacientes na fila
-    if (fila.getTamanho() > 0) {
-        Evento eventoNovo;
-
-        if (!m_estado) { // Verifica se a unidade está desocupada
-            Paciente* proximoPacienteAtendido = fila.Desenfileira();
-            if (proximoPacienteAtendido != nullptr) { // Verifica se o paciente é válido
-                ocupar(proximoPacienteAtendido); // Marca a unidade como ocupada
-                alterarStatus(proximoPacienteAtendido); // Altera o status do paciente
-                proximoPacienteAtendido->adicionarTempo(m_tempo_exec, proximoPacienteAtendido->getStatus());   
-                eventoNovo = Evento(proximoPacienteAtendido, proximoPacienteAtendido->getData(), proximoPacienteAtendido->getStatus()); 
-                escalonador.insereEvento(eventoNovo); // Insere o evento de atendimento no escalonador
-                
-               
-                
-            }
-        } else { // Se a unidade está ocupada
-            // Adiciona tempo de espera ao paciente que está esperando na fila
-            esvaziar();
-            // Cria evento para o paciente que está esperando e insere no escalonador
-            eventoNovo = Evento(paciente, paciente->getData(), paciente->getStatus()); 
-            escalonador.insereEvento(eventoNovo);   
-            
-        }
-        
-        // Atualiza o tempo de espera do paciente na fila
-        fila.adicionaTempoEspera(m_tempo_exec);
-    } */
 
 
 

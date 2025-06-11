@@ -59,7 +59,13 @@ void simular();
 Fila& getFilaPorEstadoEurgencia(Estado estado, int urgencia);
 void processarFila(Estado estadoAtual, Estado proximoEstado, Escalonador& escalonador, Paciente* paciente);
 void defineFila(Paciente* paciente, Estado estado);
-void avaliaFilas(Estado estado, Escalonador& escalonador, Paciente* paciente); 
+bool avaliaFilas(Estado estado, Escalonador& escalonador, Paciente* paciente); 
+
+void processarEvento(Estado estadoAtual, Estado proximoEstado, int unidadeIndex, Fila& fila, Escalonador& escalonador, Paciente* paciente);
+void criarEvento(Paciente* paciente, Escalonador& escalonador);
+void processarEspera(int unidadeIndex, Escalonador& escalonador, Paciente* paciente);
+void processarAtendimento(Estado proximoEstado, int unidadeIndex, Escalonador& escalonador, Paciente* paciente);
+bool unidadeDisponivel(int unidadeIndex);
 
  Vetor<Fila*> getFilasPorEstado(Estado estado);
 

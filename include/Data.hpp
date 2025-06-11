@@ -1,3 +1,4 @@
+#include <cmath>
 #include <ctime>
 #include <iostream>
 
@@ -57,22 +58,59 @@ struct Data {
     const char* meses[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", 
                            "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 
-    // Obtém o dia da semana
+    // Obtém o tempo atual
     time_t timestamp = toTimestamp();
     std::tm* tempo = localtime(&timestamp);
 
-    std::cout << diasSemana[tempo->tm_wday] << " "           // Dia da semana
-              << meses[tempo->tm_mon] << " "                // Nome do mês
-              << (tm_data.tm_mday < 10 ? "0" : "")          // Dia do mês com zero à esquerda
-              << tm_data.tm_mday << " " 
-              << (tm_data.tm_hour < 10 ? "0" : "")          // Hora com zero à esquerda
-              << tm_data.tm_hour << ":"
-              << (tm_data.tm_min < 10 ? "0" : "")           // Minuto com zero à esquerda
-              << tm_data.tm_min << ":"
-              << (tm_data.tm_sec < 10 ? "0" : "")           // Segundo com zero à esquerda
-              << tm_data.tm_sec << " " 
-              << (tm_data.tm_year + 1900) <<" ";                // Ano
+    if (tempo == nullptr) {
+        std::cerr << "Erro ao obter tempo local." << std::endl;
+        return;
+    }
+
+    // Ajustes de segundos:
+    if (tempo->tm_sec > 57) {
+        timestamp += 1;  // Adiciona 1 segundo
+        tempo = localtime(&timestamp);
+    } else if (tempo->tm_sec < 5) {
+        tempo->tm_sec = 0; 
+        timestamp = mktime(tempo);  // Define os segundos para 0
+        tempo = localtime(&timestamp);
+    }
+
+    std::cout <<" "<< diasSemana[tempo->tm_wday] << " "  // Dia da semana
+              << meses[tempo->tm_mon] << " "       // Nome do mês
+              << (tempo->tm_mday < 10 ? "0" : "")  // Dia do mês com zero à esquerda
+              << tempo->tm_mday << " " 
+              << (tempo->tm_hour < 10 ? "0" : "")  // Hora com zero à esquerda
+              << tempo->tm_hour << ":" 
+              << (tempo->tm_min < 10 ? "0" : "")   // Minuto com zero à esquerda
+              << tempo->tm_min << ":" 
+              << (tempo->tm_sec < 10 ? "0" : "")   // Segundo com zero à esquerda
+              << tempo->tm_sec << " " 
+              << (tempo->tm_year + 1900);          // Ano
 }
+
+
+
+
+    public:
+  // Função para calcular a diferença em horas
+    float calcularDiferencaEmHoras(const Data& outraData) const {
+        // Obtemos o timestamp para cada data
+        time_t timestamp1 = this->toTimestamp();
+        time_t timestamp2 = outraData.toTimestamp();
+
+        // Calculamos a diferença em segundos
+        double diferencaSegundos = difftime(timestamp2, timestamp1);
+
+        // Convertendo a diferença para horas
+        float diferencaHoras = static_cast<float>(diferencaSegundos) / 3600.0f;
+
+        // Retornamos a diferença em horas
+        return std::fabs(diferencaHoras); // Usamos fabs para garantir que o valor seja positivo
+    }
+
+
 
 void adicionarHoras(float horas) {
     try {

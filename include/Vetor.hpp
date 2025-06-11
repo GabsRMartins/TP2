@@ -97,26 +97,28 @@ Vetor(size_t capacidadeInicial, size_t tamanhoInicial, T valorInicial) {
     return *this;
   };
 
-  void push_back(T e){
+  void push_back(const T& e) {
     if (m_buf == nullptr) {
-        m_buf = new T[2];
-        m_capacity = 2;   // Numeros arbritrarios
+        m_capacity = 2;   // Capacidade inicial arbitrária
+        m_buf = new T[m_capacity];
         m_size = 0;
     }
+
     if (m_size >= m_capacity) {
-        m_capacity = m_capacity * 2;
-        T* newbuff = new T[m_capacity];
-        for(size_t i = 0; i < m_size; ++i){
-          newbuff[i] = m_buf[i];
+        m_capacity *= 2;
+        T* newbuf = new T[m_capacity];
+
+        for (size_t i = 0; i < m_size; ++i) {
+            newbuf[i] = std::move(m_buf[i]);  // Movimentando elementos para evitar cópias
         }
+
         delete[] m_buf;
-        m_buf = newbuff;
+        m_buf = newbuf;
     }
-    m_buf[m_size] = e;
-    m_size++;
-    
-  }
-  
+
+    m_buf[m_size++] = e;
+}
+
   size_t size() const {return m_size;}
   T get(size_t pos){ assert(pos < m_size); return m_buf[pos];  }
   //retorna o endereço da posição
@@ -124,29 +126,66 @@ Vetor(size_t capacidadeInicial, size_t tamanhoInicial, T valorInicial) {
 
  const T& operator[](size_t index) const{ assert(index < m_size); return m_buf[index]; }
 
-  void pop() {
-        if (m_size == 0) {
-            throw std::runtime_error("Erro: Tentativa de realizar pop em um vetor vazio.");
-        }
-        --m_size;  // Apenas reduz o tamanho lógico
+void pop() {
+    if (m_size == 0) {
+        throw std::runtime_error("Erro: Tentativa de realizar pop em um vetor vazio.");
     }
+    m_buf[m_size - 1] = T();  // Define o último elemento como valor padrão
+    --m_size;  // Apenas reduz o tamanho lógico
+}
 
 
-// Retorna o último elemento do vetor
+T& at(size_t index) {
+    if (index >= m_size) {
+        throw std::out_of_range("Index fora dos limites.");
+    }
+    return m_buf[index];
+}
+
+
+
+
 T& back() {
-    if (m_size == 0) {
-        throw std::runtime_error("Vetor vazio. Não há elementos para acessar.");
-    }
+    assert(m_size > 0 && "Tentativa de acessar back em um vetor vazio.");
     return m_buf[m_size - 1];
 }
 
-// Versão constante para uso em vetores constantes
 const T& back() const {
-    if (m_size == 0) {
-        throw std::runtime_error("Vetor vazio. Não há elementos para acessar.");
-    }
+    assert(m_size > 0 && "Tentativa de acessar back em um vetor vazio.");
     return m_buf[m_size - 1];
 }
+
+
+
+// Retorna um ponteiro para o primeiro elemento do vetor
+T* begin() {
+    return m_buf;  // Retorna o ponteiro para o início do array
+}
+
+// Remove o elemento na posição especificada
+void erase(size_t index) {
+    if (index >= m_size) {
+        throw std::out_of_range("Index fora dos limites");
+    }
+    
+    // Deslocando elementos para a esquerda
+    for (size_t i = index; i < m_size - 1; ++i) {
+        m_buf[i] = std::move(m_buf[i + 1]);
+    }
+
+    // Definir o último elemento para um valor padrão para evitar lixo de memória
+    m_buf[m_size - 1] = T();
+
+    --m_size;
+}
+
+
+
+// Versão const para begin
+const T* begin() const {
+    return m_buf;
+}
+
 
 
 

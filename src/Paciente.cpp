@@ -1,10 +1,22 @@
 #include "../include/Paciente.hpp"
+#include <iomanip>
 #include <string>
 
-Paciente::Paciente()
-    : m_id(0), alta_atendimento(false), m_ano(0), m_mes(0), m_dia(0), m_hora(0),
-      m_urgencia(0), qnt_mh(0), qnt_tl(0), qnt_ei(0), qnt_im(0) {}
 
+
+Paciente::Paciente()
+    : m_id(0)
+    , alta_atendimento(false)
+    , m_ano(0)
+    , m_mes(0)
+    , m_dia(0)
+    , m_hora(0)
+    , m_urgencia(0)
+    , qnt_mh(0)
+    , qnt_tl(0)
+    , qnt_ei(0)
+    , qnt_im(0)
+{}
 
 Paciente::Paciente(unsigned long id, bool alta, int ano, int mes, int dia, int hora, int urgencia, int mh, int tl, int ei, int im){
     m_id = id;
@@ -36,11 +48,12 @@ bool Paciente::getAlta() const { return alta_atendimento;}
 
 
 void Paciente::print() const {
-    std::cout<< m_id << " ";
+    std::cout<< m_id;
     Data dataChegada = Data(m_ano,m_mes,m_dia,m_hora);
     dataChegada.print();
     m_data.print();
-    std::cout<<m_tempo_total_hospital << " "  << m_tempo_atendimento << " " << m_tempo_ocioso << std::endl;
+    std::cout << std::fixed << std::setprecision(2);
+    std::cout<<" "<<m_tempo_total_hospital <<"  "<< m_tempo_atendimento <<"  "<< m_tempo_ocioso << std::endl;
 }
 void Paciente::adicionarTempo(float tempo, Estado estado) {
     if (estado == Estado::FILA_TRIAGEM || estado == Estado::FILA_ATENDIMENTO || 
@@ -50,7 +63,7 @@ void Paciente::adicionarTempo(float tempo, Estado estado) {
     } else if (estado == Estado::SENDO_TRIADO || estado == Estado::SENDO_ATENDIDO) {
         m_tempo_atendimento += tempo; // Atualiza tempo de atendimento
     } else {
-        float multiplicador = 1;
+        float multiplicador;
         switch (estado) {
             case Estado::R_EI:
                 multiplicador = qnt_ei;

@@ -17,7 +17,7 @@ class Unidade{
 
 public:
     bool ocupar(Paciente* Paciente);
-    void esvaziar();
+    void retirar(Paciente* Paciente);
     Unidade();
     Unidade(int atendentes, float tempo_exec);
     ~Unidade();
@@ -25,10 +25,15 @@ public:
     int getQtdAtendentes() const;
     bool getEstado() const;
     float getTemp() const;
+    int getQntPaciente() const { return  qnt_pacientes;}
+
+    Paciente* getPacienteSaida();
+
+    
 
     void avaliaFilas();
     void alterarStatus(Paciente* paciente);
-    void atender(Fila& fila, Escalonador& escalonador , Paciente* paciente);
+    bool atender(Fila& fila, Escalonador& escalonador , Paciente* paciente);
     void atenderTriagem(Fila& fila, Escalonador& escalonador);
 };
 

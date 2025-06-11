@@ -30,6 +30,7 @@ Fila::~Fila()
 
 void Fila::Enfileirar(Paciente* paciente)
 {
+  //std::cout << "Inserindo paciente na fila: " << paciente->getId() << std::endl;
     if (paciente == nullptr) {
         throw std::invalid_argument("Tentativa de enfileirar um paciente nulo.");
     }
@@ -47,23 +48,43 @@ void Fila::Enfileirar(Paciente* paciente)
 
 Paciente* Fila::Desenfileira() {
     if (m_tamanho == 0) {
-        throw std::invalid_argument("Fila vazia");
+        std::cerr << "Erro: Tentativa de desenfileirar uma fila vazia!" << std::endl;
+        return nullptr;  // Retorna nullptr em vez de lançar uma exceção para evitar travamentos inesperados
     }
 
-    TipoCelula* p = m_inicio;         // Ponteiro para a célula que será removida
-    Paciente* aux = m_inicio->m_paciente; // Obtém o ponteiro para o paciente
+    TipoCelula* p = m_inicio;                  // Ponteiro para a célula a ser removida
+    Paciente* aux = m_inicio->m_paciente;       // Obtém o ponteiro para o paciente
 
-    m_inicio = m_inicio->prox;       // Atualiza o início da fila
+    m_inicio = m_inicio->prox;                 // Atualiza o início da fila
 
-    if (m_inicio == nullptr) {       // Se a fila ficou vazia
-        m_fim = nullptr;             // Atualiza também o ponteiro para o fim
+    if (m_inicio == nullptr) {                  // Se a fila ficou vazia
+        m_fim = nullptr;                        // Atualiza o ponteiro para o fim
     }
 
-    delete p;                        // Libera a memória da célula removida
-    m_tamanho--;                     // Decrementa o tamanho da fila
+    delete p;                                   // Libera a memória da célula removida
+    m_tamanho--;                                // Decrementa o tamanho da fila
 
-    return aux;                      // Retorna o paciente removido
+   // std::cout << "Paciente removido da fila: " << aux->getId() << std::endl;
+
+    return aux;                                 // Retorna o paciente removido
 }
+
+
+
+Paciente* Fila::getFirst() {
+    if (m_tamanho == 0) {
+        std::cerr << "Erro: Tentativa de desenfileirar uma fila vazia!" << std::endl;
+        return nullptr;  // Retorna nullptr em vez de lançar uma exceção para evitar travamentos inesperados
+    }
+
+    TipoCelula* p = m_inicio;                  // Ponteiro para a célula a ser removida
+    Paciente* aux = m_inicio->m_paciente;       // Obtém o ponteiro para o paciente
+
+
+    return aux;                             
+}
+
+
 
 
 
